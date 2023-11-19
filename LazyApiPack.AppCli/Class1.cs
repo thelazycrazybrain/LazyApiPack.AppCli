@@ -66,7 +66,7 @@ namespace LazyApiPack.AppCli
             [FunctionSwitches] List<string> switches)
         {
             var n = new string[1];
-            n
+            
         }
 
     }
