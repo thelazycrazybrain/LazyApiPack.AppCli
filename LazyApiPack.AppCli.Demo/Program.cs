@@ -23,9 +23,8 @@ internal class Program
 
     public class ConsoleApp1 : ConsoleApplication
     {
-        public bool IsRunning = true;
         [ConsoleFunction]
-        [Documentation("Formats a text with the given parameters.")]
+        [Documentation("Formats a text with the given parameter.")]
         public string Format(
             [FunctionParameter]
                 [Documentation("The format string indexed with {i} 0-n")]
@@ -35,12 +34,21 @@ internal class Program
                 bool upperCase,
             [FunctionParameter]
                 [Documentation("The list of parameters used in the text.")]
-                params string[] args)
+                string arg)
         {
             var format = string.Format(text, args);
             return upperCase ? format.ToUpper() : format;
         }
 
+        [ConsoleFunction]
+        public void PrintParams(params string[] args)
+        {
+            PrintLine("Print Params: ");
+            foreach (var param in args)
+            {
+                PrintLine(param);
+            }
+        }
         [ConsoleFunction]
         [Documentation("Returns \"Hello World\"")]
         public string HelloWorld()
@@ -48,27 +56,20 @@ internal class Program
             return "Hello World";
         }
 
-        [ConsoleFunction("exit", "quit", "xit", "close")]
-        [Documentation("Closes the application.")]
-        public void Exit()
-        {
-            IsRunning = false;
-        }
-
         protected override void OnFunctionNotFound(FunctionNotFoundEventArgs e)
         {
-            Console.WriteLine($"Command {e.FunctionName} not found.");
+            PrintLine($"Command {e.FunctionName} not found.");
             e.ContinueWithoutError = true;
         }
         protected override void OnExecuted(object? result)
         {
-            Console.WriteLine();
-            Console.Write("> ");
+            PrintLine();
+            Print("> ");
         }
 
         protected override void OnInvalidCommand(InvalidCommandEventArgs e)
         {
-            Console.WriteLine($"Command '{e.Command}' is invalid.");
+            PrintLine($"Command '{e.Command}' is invalid.");
             e.ContinueWithoutError = true;
         }
 

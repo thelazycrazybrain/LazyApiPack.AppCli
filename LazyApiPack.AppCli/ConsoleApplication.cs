@@ -11,6 +11,7 @@ namespace LazyApiPack.AppCli
 {
     public abstract class ConsoleApplication
     {
+
         private List<FunctionDefinition> _functions = new();
         public ConsoleApplication()
         {
@@ -98,14 +99,25 @@ namespace LazyApiPack.AppCli
             //{
             //    if()
             //}
-            var parameters = GetParameters(@params, cmd.Parameters);
-            if (parameters.Count() == 0)
+
+            // Only pass list of parameters to function if
+            // Func(params string[] parameters)
+            if (cmd.Parameters.Count == 1 && cmd.Parameters[0].Parameter.ParameterType.IsAssignableTo(typeof(IEnumerable<string>)))
             {
-                result = cmd.Function.Invoke(this, null);
+                result = cmd.Function.Invoke(this, new[] { @params.ToArray() });
             }
             else
             {
-                result = cmd.Function.Invoke(this, parameters.Select(v => v.Value).ToArray());
+                // More complex function
+                var parameters = GetParameters(@params, cmd.Parameters);
+                if (parameters.Count() == 0)
+                {
+                    result = cmd.Function.Invoke(this, null);
+                }
+                else
+                {
+                    result = cmd.Function.Invoke(this, parameters.Select(v => v.Value).ToArray());
+                }
             }
             return result;
             //}
@@ -290,7 +302,7 @@ namespace LazyApiPack.AppCli
                     }
                 }
             }
-            OnPrint(sb.ToString());
+            Print(sb.ToString());
             return sb.ToString();
         }
 
@@ -321,6 +333,16 @@ namespace LazyApiPack.AppCli
             }
 
         }
+
+        public bool IsRunning { get; protected set; } = true;
+
+        [ConsoleFunction("exit", "quit", "xit", "close")]
+        [Documentation("Closes the application.")]
+        public virtual void Exit()
+        {
+            IsRunning = false;
+        }
+
         /// <summary>
         /// Executes a command.
         /// </summary>
@@ -332,10 +354,27 @@ namespace LazyApiPack.AppCli
             return (TResult)Execute(command);
         }
 
-        protected virtual void OnPrint(string text)
+        protected virtual void OnPrint(string? text)
         {
-            Console.WriteLine(text);
+            Console.Write(text);
         }
+
+        /// <summary>
+        /// Prints a line.
+        /// </summary>
+        protected void PrintLine(string? text = null)
+        {
+            OnPrint(text + "\r\n");
+        }
+
+        /// <summary>
+        /// Prints text without a linebreak.
+        /// </summary>
+        protected void Print(string? text = null)
+        {
+            OnPrint(text);
+        }
+
         protected virtual void OnInvalidCommand(InvalidCommandEventArgs e)
         {
 
