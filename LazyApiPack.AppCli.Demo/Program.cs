@@ -36,7 +36,7 @@ internal class Program
                 [Documentation("The list of parameters used in the text.")]
                 string arg)
         {
-            var format = string.Format(text, args);
+            var format = string.Format(text, arg);
             return upperCase ? format.ToUpper() : format;
         }
 
